@@ -1,0 +1,67 @@
+###
+ # @Author: Vincent Young
+ # @Date: 2022-10-05 08:55:52
+ # @LastEditors: Vincent Young
+ # @LastEditTime: 2022-10-05 08:56:15
+ # @FilePath: /shlink-cli/shlink
+ # @Telegram: https://t.me/missuo
+ # 
+ # Copyright © 2022 by Vincent, All Rights Reserved. 
+### 
+#!/usr/bin/env bash
+
+# Configure these 2 lines and leave the rest
+SHLINK_HOST="YOUR_HOST"
+SHLINK_API_KEY="YOUR_API_KEY"
+
+shlink_help() {
+    echo "Shorten URLs with Shlink"
+    echo
+    echo "Usage:"
+    echo "  ${0##*/} <url>"
+    echo "  ${0##*/} <url> -f <FORMAT>"
+    echo "  ${0##*/} <url> --help"
+    echo
+    echo "Options:"
+    echo "  -h | --help                Show this screen"
+    echo "  -f | --format <FORMAT>     Ouput format (json, txt)"
+    exit 1
+}
+
+# If no param or param is -h|--help
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    shlink_help
+fi
+
+# Assuming first parameter is the URL
+URL=$1;
+shift;
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case $key in
+        -f|--format)
+        FORMAT="$2"
+        shift # argument
+        shift # value
+        ;;
+        -h|--help)
+        yourls_help
+        exit 1
+        ;;
+        *)    # unknown option
+        echo "${0##*/}: unknown option $1"
+        echo "Try '${0##*/} --help' for more information."
+        exit 1
+        ;;
+    esac
+done
+
+if [ -z "$FORMAT" ]; then
+    FORMAT="txt"
+fi
+
+curl -s "$SHLINK_HOST/rest/v2/short-urls/shorten?longUrl=$URL&apiKey=$SHLINK_API_KEY&format=$FORMAT"
+
